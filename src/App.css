@@ -1,6 +1,34 @@
 #root {
-  max-width: 1280px;
   margin: 0 auto;
   padding: 2rem;
   text-align: center;
+  width: 100%;
+}
+
+
+.upload-btn {
+  display: flex;
+  flex-direction: column;
+  padding: 10px 20px;
+  border: 2px dashed #5a5a5a; 
+  border-radius: 5px;
+  cursor: pointer;
+  font-size: 16px;
+  font-weight: bold;
+  color: #5a5a5a;
+  text-align: center;
+  transition: border-color 0.3s ease;
+}
+
+.upload-btn:hover {
+  border-color: #666;
+}
+
+.upload-icon {
+  font-size: 2em;
+}
+
+canvas {
+  width: 100%;
+  height: auto;
 }
