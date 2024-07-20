@@ -1,6 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
-import exif from 'exifreader'
 import { CanvasDimension, FrameConfiguration } from './App.types'
 
 const defaultFrameConfiguration: FrameConfiguration = {
@@ -22,7 +21,7 @@ function App() {
       width: image.width + 2 * 16,
       height: image.height,
     }
-  }, [image])
+  }, [image]) 
 
   const handleDownloadImage = () => {
     if (!canvasRef.current) return
@@ -46,8 +45,6 @@ function App() {
     reader.onload = async e => {
       if (!e.target?.result) return
       const image = new Image()
-      const tags = await exif.load(e.target.result)
-      console.log(tags)
       image.onload = () => {
         setImage(image)
       }
