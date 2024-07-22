@@ -48,12 +48,13 @@ function App() {
     document.body.removeChild(link);
   }
 
-  const handleFormChange = (event: React.ChangeEvent<HTMLFormElement>): void => {
-    if (!event.target) return
-    setExif(prev => ({
-      ...prev as ImageExif,
-      [event.target.name]: event.target.value
-    }))
+  const handleFormSubmit = (form: React.FormEvent<HTMLFormElement>)=> {
+    form.preventDefault()
+
+    const formData = new FormData(form.target as HTMLFormElement)
+    const inputs = Object.fromEntries(formData)
+    const newExif = Object.keys(exif).reduce((prev, curr) => ({...prev, [curr]: inputs[curr]}), {})
+    setExif(newExif as ImageExif)
   }
 
   const handleUploadImage = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -138,12 +139,13 @@ function App() {
         <>
           <canvas ref={canvasRef} onClick={() => setImage(null)} />
           <div className='exif-form'>
-            <form onChange={handleFormChange}>
+            <form onSubmit={handleFormSubmit}>
               <input name="deviceName" type='text' placeholder='Device Name'/>
               <input name="focalLength" type='number'  placeholder='Focal Length'/>
               <input name="aperture" type='number' step=".1" placeholder='Aperture'/>
               <input name="shutterSpeed" type='text' placeholder='Shutter Speed'/>
               <input name="iso" type='number' placeholder='ISO'/>
+              <button type='submit'>Apply</button>
             </form>
           </div>
           <button className='btn-download' onClick={handleDownloadImage}>Download</button>

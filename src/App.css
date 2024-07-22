@@ -28,7 +28,7 @@
   font-size: 2em;
 }
 
-.btn-download {
+.btn-download,.exif-form > form > button {
   width: 100%;
   border: none;
   padding: 1em;
@@ -40,8 +40,13 @@
   cursor: pointer;
 }
 
+.exif-form > form > button {
+  margin-top: unset;
+  background-color: #ff5454;
+}
+
 .exif-form {
-  padding: 2em;
+  padding: 1.5em;
   background-color: white;
   color: #333;
   border-radius: 1em;
