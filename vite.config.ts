@@ -83,7 +83,6 @@ export default defineConfig({
   ],
   base: "https://ibrahimsyah.github.io/polaroit",
   build: {
-    cssMinify: 'lightningcss',
     minify: 'terser'
   }
 })
