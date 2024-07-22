@@ -10,3 +10,11 @@ export type FrameConfiguration = {
     description: string
     descriptionSize: number
 }
+
+export type ImageExif = {
+    deviceName: string
+    focalLength: number
+    aperture: number
+    iso: number
+    shutterSpeed: string
+}
