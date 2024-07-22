@@ -10,7 +10,7 @@ export default defineConfig({
       manifest: {
         name: "Polaro It!",
         description: "Turn any photo into a Polaroid with Polaro It!",
-        short_name: "Polaroit",
+        short_name: "Polaro It!",
         theme_color: "#FFE137",
         icons: [
           {
