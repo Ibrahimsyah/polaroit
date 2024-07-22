@@ -1,1 +1,1 @@
-if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('/sw.js', { scope: '/' })})}
+if('serviceWorker' in navigator) {window.addEventListener('load', () => {navigator.serviceWorker.register('https://ibrahimsyah.github.io/polaroit/sw.js', { scope: 'https://ibrahimsyah.github.io/polaroit/' })})}
