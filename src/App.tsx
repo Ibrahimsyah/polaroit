@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
-import { CanvasDimension, FrameConfiguration } from './App.types'
+import { CanvasDimension, FrameConfiguration, ImageExif } from './App.types'
 
 const defaultFrameConfiguration: FrameConfiguration = {
   padding: 16,
@@ -10,15 +10,27 @@ const defaultFrameConfiguration: FrameConfiguration = {
   descriptionSize: 16,
 }
 
+const defaultExif: ImageExif = {
+  aperture: 0,
+  deviceName: "",
+  focalLength: 0,
+  iso: 0,
+  shutterSpeed: ""
+}
+
+const FRAME_MIN_WIDTH = 800
+
 function App() {
   const [image, setImage] = useState<HTMLImageElement | null>()
   const [frameConfiguration] = useState<FrameConfiguration>(defaultFrameConfiguration)
+  const [exif, setExif] = useState<ImageExif>(defaultExif)
   const canvasRef = useRef<HTMLCanvasElement>(null)
 
   const canvasDimensions = useMemo<CanvasDimension | null>(() => {
     if (!image) return null
+
     return {
-      width: image.width + 2 * 16,
+      width: Math.max(FRAME_MIN_WIDTH, image.width),
       height: image.height,
     }
   }, [image]) 
@@ -34,6 +46,14 @@ function App() {
     link.click();
 
     document.body.removeChild(link);
+  }
+
+  const handleFormChange = (event: React.ChangeEvent<HTMLFormElement>): void => {
+    if (!event.target) return
+    setExif(prev => ({
+      ...prev as ImageExif,
+      [event.target.name]: event.target.value
+    }))
   }
 
   const handleUploadImage = (event: React.ChangeEvent<HTMLInputElement>): void => {
@@ -54,7 +74,7 @@ function App() {
   }
 
   useEffect(() => {
-    if (!image || !canvasDimensions) return
+    if (!image || !canvasDimensions || !exif) return
     if (!canvasRef || !canvasRef.current) return
 
     const canvas = canvasRef.current
@@ -74,7 +94,7 @@ function App() {
     const prefixDimens = ctx.measureText("Shot on ")
 
     ctx.font = titleFontConfig
-    const titleDimens = ctx.measureText("Samsung Galaxy A54")
+    const titleDimens = ctx.measureText(exif.deviceName)
 
     const additionalHeight = 2 * normalizedPadding // up and bottom padding
       + 2 * normalizedPadding // before and after text padding
@@ -82,15 +102,19 @@ function App() {
       + normalizedTitleSize
       + normalizedFooterSize
 
-    canvas.width = 2 * normalizedPadding + image.width
-    canvas.height = image.height + additionalHeight
+    const imageScale = canvasDimensions.width / image.width
+    const imageWidth = image.width * imageScale
+    const imageHeight = image.height * imageScale
+
+    canvas.width = 2 * normalizedPadding + canvasDimensions.width
+    canvas.height = imageHeight + additionalHeight
 
     ctx.fillStyle = "white"
     ctx.fillRect(0, 0, canvas.width, canvas.height)
-    ctx.drawImage(image, normalizedPadding, normalizedPadding, image.width, image.height)
+    ctx.drawImage(image, normalizedPadding, normalizedPadding, imageWidth, imageHeight)
 
     const textX = (canvasDimensions.width - (prefixDimens.width + titleDimens.width)) / 2
-    const textY = image.height + 2 * normalizedPadding + normalizedTitleSize
+    const textY = imageHeight + 2 * normalizedPadding + normalizedTitleSize
 
     ctx.fillStyle = "#666"
     ctx.font = prefixFontConfig
@@ -98,13 +122,14 @@ function App() {
 
     ctx.fillStyle = "black"
     ctx.font = titleFontConfig
-    ctx.fillText("Samsung Galaxy A54", textX + prefixDimens.width, textY)
+    ctx.fillText(exif.deviceName, textX + prefixDimens.width, textY)
 
     ctx.fillStyle = "#666"
     ctx.font = `400 ${normalizedFooterSize}px Roboto`
-    const footerWidth = ctx.measureText("38mm f/2.2 1/400s ISO200").width
-    ctx.fillText("38mm f/2.2 1/400s ISO200", (canvasDimensions.width - footerWidth) / 2, image.height + 2 * normalizedPadding + normalizedPadding + normalizedTitleSize + normalizedPadding)
-  }, [image, canvasDimensions, frameConfiguration])
+    const footerText = `${exif.focalLength}mm f/${exif.aperture} ${exif.shutterSpeed}s ISO${exif.iso}`
+    const footerWidth = ctx.measureText(footerText).width
+    ctx.fillText(footerText, (canvasDimensions.width - footerWidth) / 2, imageHeight + 2 * normalizedPadding + normalizedPadding + normalizedTitleSize + normalizedPadding)
+  }, [image, canvasDimensions, frameConfiguration, exif])
 
   return (
     <div id='main'>
@@ -112,6 +137,15 @@ function App() {
       {image ? (
         <>
           <canvas ref={canvasRef} onClick={() => setImage(null)} />
+          <div className='exif-form'>
+            <form onChange={handleFormChange}>
+              <input name="deviceName" type='text' placeholder='Device Name'/>
+              <input name="focalLength" type='number'  placeholder='Focal Length'/>
+              <input name="aperture" type='number' step=".1" placeholder='Aperture'/>
+              <input name="shutterSpeed" type='text' placeholder='Shutter Speed'/>
+              <input name="iso" type='number' placeholder='ISO'/>
+            </form>
+          </div>
           <button className='btn-download' onClick={handleDownloadImage}>Download</button>
         </>
       ) : (

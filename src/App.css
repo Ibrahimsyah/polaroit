@@ -40,6 +40,30 @@
   cursor: pointer;
 }
 
+.exif-form {
+  padding: 2em;
+  background-color: white;
+  color: black;
+  border-radius: 1em;
+}
+
+.exif-form > form{
+  display: flex;
+  flex-direction: column;
+  gap: 1em;
+}
+
+.exif-form > form > input {
+  border: none;
+  outline: dashed .2em black;
+  border-radius: 1em;
+  padding: 1em;
+}
+
+.exif-form > form > input:focus-visible {
+  outline: dashed .2em #bd600a;
+}
+
 canvas {
   width: 100%;
   height: auto;
