@@ -1,0 +1,1 @@
+if('serviceWorker' in navigator) navigator.serviceWorker.register('/polaroit/dev-sw.js?dev-sw', { scope: '/polaroit/', type: 'classic' })
