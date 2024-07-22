@@ -82,7 +82,4 @@ export default defineConfig({
     })
   ],
   base: "https://ibrahimsyah.github.io/polaroit",
-  build: {
-    sourcemap: true
-  }
 })
