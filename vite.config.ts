@@ -9,7 +9,7 @@ export default defineConfig({
       registerType: 'autoUpdate',
       manifest: {
         name: "Polaro It!",
-        description: "Create a polaroid from any photo with Polaro It!",
+        description: "Turn any photo into a Polaroid with Polaro It!",
         short_name: "Polaroit",
         theme_color: "#FFE137",
         icons: [

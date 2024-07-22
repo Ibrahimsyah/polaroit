@@ -43,7 +43,7 @@
 .exif-form {
   padding: 2em;
   background-color: white;
-  color: black;
+  color: #333;
   border-radius: 1em;
 }
 
@@ -55,7 +55,7 @@
 
 .exif-form > form > input {
   border: none;
-  outline: dashed .2em black;
+  outline: dashed .2em #333;
   border-radius: 1em;
   padding: 1em;
 }

@@ -133,7 +133,7 @@ function App() {
 
   return (
     <div id='main'>
-      <h1>Polaroit!</h1>
+      <h1>Polaro It!</h1>
       {image ? (
         <>
           <canvas ref={canvasRef} onClick={() => setImage(null)} />
@@ -158,7 +158,7 @@ function App() {
               accept='image/*'
               onChange={handleUploadImage} />
             <span className="upload-icon">&#x1F4F7;</span>
-            Upload Photo
+            Upload a photo
           </label>
         </div>
       )}
