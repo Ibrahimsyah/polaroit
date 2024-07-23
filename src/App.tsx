@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
 import './App.css'
 import { CanvasDimension, FrameConfiguration, ImageExif } from './App.types'
+import { EVENT_TAG, pushEvent } from './util/gtm'
 
 const defaultFrameConfiguration: FrameConfiguration = {
   padding: 16,
@@ -37,6 +38,8 @@ function App() {
 
   const handleDownloadImage = () => {
     if (!canvasRef.current) return
+    
+    pushEvent(EVENT_TAG.DOWNLOAD_RESULT)
     const dataURL = canvasRef.current.toDataURL("image/png")
     const link = document.createElement('a');
     link.download = "result";
@@ -70,6 +73,7 @@ function App() {
         setImage(image)
       }
       image.src = e.target.result as string
+      pushEvent(EVENT_TAG.UPLOAD_SUCCESS)
     }
     reader.readAsDataURL(event.target.files[0])
   }
@@ -158,6 +162,7 @@ function App() {
               type="file"
               style={{ display: 'none' }}
               accept='image/*'
+              onClick={() => pushEvent(EVENT_TAG.UPLOAD_CLICK)}
               onChange={handleUploadImage} />
             <span className="upload-icon">&#x1F4F7;</span>
             Upload a photo
