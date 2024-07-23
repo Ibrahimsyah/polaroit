@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react'
-import './App.css'
 import { CanvasDimension, FrameConfiguration, ImageExif } from './App.types'
 import { EVENT_TAG, pushEvent } from './util/gtm'
+import ExifReader from 'exifreader'
+import './App.css'
 
 const defaultFrameConfiguration: FrameConfiguration = {
   padding: 16,
@@ -21,11 +22,24 @@ const defaultExif: ImageExif = {
 
 const FRAME_MIN_WIDTH = 800
 
+const getImageExif = async (image: HTMLImageElement): Promise<ImageExif> => {
+  const tags = await ExifReader.load(image.src)
+  const focalLength = tags.FocalLength?.description
+  return Promise.resolve({
+    aperture: Number(tags.ApertureValue?.description) || 0,
+    deviceName: tags.Model?.description || "",
+    focalLength: Number(focalLength?.split("")[0]) || 0,
+    iso: Number(tags.ISOSpeedRatings?.value) || 0,
+    shutterSpeed: tags.ShutterSpeedValue?.description || "",
+  })
+}
+
 function App() {
   const [image, setImage] = useState<HTMLImageElement | null>()
   const [frameConfiguration] = useState<FrameConfiguration>(defaultFrameConfiguration)
   const [exif, setExif] = useState<ImageExif>(defaultExif)
   const canvasRef = useRef<HTMLCanvasElement>(null)
+  const exifFormRef = useRef<HTMLFormElement>(null)
 
   const canvasDimensions = useMemo<CanvasDimension | null>(() => {
     if (!image) return null
@@ -34,11 +48,11 @@ function App() {
       width: Math.max(FRAME_MIN_WIDTH, image.width),
       height: image.height,
     }
-  }, [image]) 
+  }, [image])
 
   const handleDownloadImage = () => {
     if (!canvasRef.current) return
-    
+
     pushEvent(EVENT_TAG.DOWNLOAD_RESULT)
     const dataURL = canvasRef.current.toDataURL("image/png")
     const link = document.createElement('a');
@@ -51,12 +65,12 @@ function App() {
     document.body.removeChild(link);
   }
 
-  const handleFormSubmit = (form: React.FormEvent<HTMLFormElement>)=> {
+  const handleFormSubmit = (form: React.FormEvent<HTMLFormElement>) => {
     form.preventDefault()
 
     const formData = new FormData(form.target as HTMLFormElement)
     const inputs = Object.fromEntries(formData)
-    const newExif = Object.keys(exif).reduce((prev, curr) => ({...prev, [curr]: inputs[curr]}), {})
+    const newExif = Object.keys(exif).reduce((prev, curr) => ({ ...prev, [curr]: inputs[curr] }), {})
     setExif(newExif as ImageExif)
   }
 
@@ -77,6 +91,18 @@ function App() {
     }
     reader.readAsDataURL(event.target.files[0])
   }
+
+  useEffect(() => {
+    if (!image) return
+
+    getImageExif(image).then(res => {
+      setExif(res)
+      for (const attr of Object.entries(res)) {
+        const input = exifFormRef.current?.elements.namedItem(attr[0]) as HTMLInputElement
+        input.value = attr[1] as string
+      }
+    })
+  }, [image])
 
   useEffect(() => {
     if (!image || !canvasDimensions || !exif) return
@@ -137,39 +163,47 @@ function App() {
   }, [image, canvasDimensions, frameConfiguration, exif])
 
   return (
-    <div id='main'>
-      <h1>Polaro It!</h1>
-      {image ? (
-        <>
-          <canvas ref={canvasRef} onClick={() => setImage(null)} />
-          <div className='exif-form'>
-            <form onSubmit={handleFormSubmit}>
-              <input name="deviceName" type='text' placeholder='Device Name'/>
-              <input name="focalLength" type='number'  placeholder='Focal Length'/>
-              <input name="aperture" type='number' step=".1" placeholder='Aperture'/>
-              <input name="shutterSpeed" type='text' placeholder='Shutter Speed'/>
-              <input name="iso" type='number' placeholder='ISO'/>
-              <button type='submit'>Apply</button>
-            </form>
+    <>
+      <main>
+        <h1>Polaro It!</h1>
+        {image ? (
+          <>
+            <canvas ref={canvasRef} onClick={() => setImage(null)} />
+            <div className='exif-form'>
+              <form ref={exifFormRef} onSubmit={handleFormSubmit}>
+                <input name="deviceName" type='text' placeholder='Device Name' />
+                <input name="focalLength" type='number' placeholder='Focal Length' />
+                <input name="aperture" type='number' step=".1" placeholder='Aperture' />
+                <input name="shutterSpeed" type='text' placeholder='Shutter Speed' />
+                <input name="iso" type='number' placeholder='ISO' />
+                <button type='submit'>Apply</button>
+              </form>
+            </div>
+            <button className='btn-download' onClick={handleDownloadImage}>Download</button>
+          </>
+        ) : (
+          <div className='uploader'>
+            <label htmlFor="file-upload" className="upload-btn">
+              <input
+                id="file-upload"
+                type="file"
+                style={{ display: 'none' }}
+                accept='image/*'
+                onClick={() => pushEvent(EVENT_TAG.UPLOAD_CLICK)}
+                onChange={handleUploadImage} />
+              <span className="upload-icon">&#x1F4F7;</span>
+              Upload a photo
+            </label>
           </div>
-          <button className='btn-download' onClick={handleDownloadImage}>Download</button>
-        </>
-      ) : (
-        <div className='uploader'>
-          <label htmlFor="file-upload" className="upload-btn">
-            <input
-              id="file-upload"
-              type="file"
-              style={{ display: 'none' }}
-              accept='image/*'
-              onClick={() => pushEvent(EVENT_TAG.UPLOAD_CLICK)}
-              onChange={handleUploadImage} />
-            <span className="upload-icon">&#x1F4F7;</span>
-            Upload a photo
-          </label>
-        </div>
-      )}
-    </div>
+        )}
+      </main>
+      <footer>
+        <p>Made with ❤️ Wanna buy me a coffee?</p>
+        <p>
+          <a href="https://saweria.co/ibrahimsyah">Saweria</a>
+        </p>
+      </footer>
+    </>
   )
 }
 
