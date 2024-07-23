@@ -1,10 +1,13 @@
-import { ReactTagManager } from "react-gtm-ts"
-
 export const pushEvent = async (eventName: EVENT_TAG, payload: object = {}) => {
-    ReactTagManager.action({
+    if (typeof window?.dataLayer?.push === 'undefined') {
+        console.error("GTM is not set up properly")
+        return
+    }
+
+    window.dataLayer.push({
         event: eventName,
-        ...payload
-    })
+        ...payload,
+    });
 }
 
 export enum EVENT_TAG {
